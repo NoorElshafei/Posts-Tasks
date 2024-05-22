@@ -6,11 +6,16 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.os.Build
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.navGraphViewModels
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.paysky.feature.posts.R
 import com.paysky.feature.posts.databinding.FragmentPostsBinding
 
 import com.paysky.network.data.errors.getMessage
 import com.paysky.network.data.errors.getType
+import com.paysky.posts.data.database.PostEntity
+import com.paysky.posts.data.request.Post
 import com.paysky.ui.extensions.hide
 import com.paysky.ui.extensions.show
 import com.paysky.ui.presentation.BaseFragment
@@ -21,11 +26,14 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PostsFragment : BaseFragment<FragmentPostsBinding>(FragmentPostsBinding::inflate) {
+class PostsFragment : BaseFragment<FragmentPostsBinding>(FragmentPostsBinding::inflate),PostsInterface {
 
-    private val viewModel by viewModels<PostsViewModel>()
-    @Inject
-    lateinit var adapter: PostsAdapter
+    private val viewModel:PostsViewModel by navGraphViewModels(R.id.post_nav) {
+        defaultViewModelProviderFactory
+    }
+
+    private val postAdapter by lazy { PostsAdapter(this) }
+
 
     override fun bindViews() {
         initUI()
@@ -33,8 +41,19 @@ class PostsFragment : BaseFragment<FragmentPostsBinding>(FragmentPostsBinding::i
     }
 
     private fun initUI() {
-        binding.recyclerView.adapter = adapter
+        binding.recyclerView.apply {
+            layoutManager =
+                LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+            adapter = adapter
+        }
+        binding.recyclerView.adapter = postAdapter
         viewModel.syncData()
+        binding.buttonSync.setOnClickListener {
+            viewModel.syncData()
+        }
+        binding.buttonAdd.setOnClickListener {
+            findNavController().navigate(R.id.action_postsFragment_to_addingFragment)
+        }
     }
 
 
@@ -43,8 +62,8 @@ class PostsFragment : BaseFragment<FragmentPostsBinding>(FragmentPostsBinding::i
             when (it) {
                 is DataState.Success -> {
                     hideLoading()
-                    adapter.submitList(it.data)
-                    showRv()
+                    postAdapter.submitList(it.data)
+                  //  showRv()
                 }
 
                 is DataState.Failure -> {
@@ -52,7 +71,31 @@ class PostsFragment : BaseFragment<FragmentPostsBinding>(FragmentPostsBinding::i
                     showMessage(
                         it.throwable.getType().getMessage().text ?: "couldn't fetch data, try again"
                     )
-                    hideRv()
+                    //hideRv()
+
+                }
+
+                DataState.Loading -> showLoading()
+
+                DataState.None -> {}
+            }
+        }
+
+        collect(viewModel.deleteDataState) {
+            when (it) {
+                is DataState.Success -> {
+                    hideLoading()
+                    showMessage("delete successfully")
+                    viewModel.syncData()
+                    //  showRv()
+                }
+
+                is DataState.Failure -> {
+                    hideLoading()
+                    showMessage(
+                        it.throwable.getType().getMessage().text ?: "couldn't fetch data, try again"
+                    )
+                    //hideRv()
 
                 }
 
@@ -81,27 +124,15 @@ class PostsFragment : BaseFragment<FragmentPostsBinding>(FragmentPostsBinding::i
         binding.recyclerView.hide()
     }
 
-    private fun isInternetAvailable(context: Context): Boolean {
-        val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
-        if (connectivityManager != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                val network: Network? = connectivityManager.activeNetwork
-                if (network != null) {
-                    val networkCapabilities = connectivityManager.getNetworkCapabilities(network)
-                    return networkCapabilities != null &&
-                            (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                                    networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                                    networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
-                }
-            } else {
-                // For devices below Android M
-                val activeNetworkInfo = connectivityManager.activeNetworkInfo
-                return activeNetworkInfo != null && activeNetworkInfo.isConnected
-            }
-        }
-        return false
-    }
 
     override fun getLayoutResId(): Int = R.layout.fragment_posts
+    override fun editPost(post: Post) {
+        viewModel.savePost(post)
+        findNavController().navigate(R.id.action_postsFragment_to_editingFragment)
+
+    }
+
+    override fun deletePost(postId: Int) {
+        viewModel.delete(postId)
+    }
 }

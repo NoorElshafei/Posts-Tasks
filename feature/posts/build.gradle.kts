@@ -54,6 +54,8 @@ dependencies {
     implementation(libs.bundles.ui)
     implementation(libs.bundles.navigationComponent)
     implementation(libs.bundles.room)
+    kapt(libs.roomCompiler)
+    //annotationProcessor("android.arch.persistence.room:compiler:2.6.1")
 
     implementation(libs.hilt)
     kapt(libs.hiltDaggerCompiler)

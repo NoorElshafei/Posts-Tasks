@@ -7,7 +7,7 @@ import androidx.room.*
 interface PostDao {
 
     @Query("SELECT * FROM posts WHERE isDeleted = 0")
-    fun getPosts(): LiveData<List<PostEntity>>
+    fun getPosts(): List<PostEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(post: PostEntity)

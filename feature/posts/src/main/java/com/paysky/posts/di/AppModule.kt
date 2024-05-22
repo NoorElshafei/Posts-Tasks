@@ -47,7 +47,9 @@ object DatabaseModule {
 
     @Singleton
     @Provides
-    fun providePostDao(database: PostDatabase): PostDao {
+    fun providePostDao(
+        database: PostDatabase
+    ): PostDao {
         return database.postDao()
     }
 }

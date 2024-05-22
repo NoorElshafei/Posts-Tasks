@@ -27,7 +27,7 @@ class PostRepositoryImpl @Inject constructor(
             val response = postService.createPost(post.toPost())
             postDao.insert(response.toPostEntity())
             emit(response)
-        }else{
+        } else {
             emit(post.toPost())
         }
     }.flowOn(dispatcher)
@@ -39,7 +39,7 @@ class PostRepositoryImpl @Inject constructor(
             val response = postService.updatePost(post.id, post.toPost())
             postDao.update(response.toPostEntity())
             emit(response)
-        }else{
+        } else {
             emit(post.toPost())
         }
     }.flowOn(dispatcher)
@@ -50,7 +50,7 @@ class PostRepositoryImpl @Inject constructor(
             val response = postService.deletePost(postId)
             postDao.delete(postId)
             emit(response)
-        }else{
+        } else {
             emit(Any())
 
         }
@@ -63,9 +63,9 @@ class PostRepositoryImpl @Inject constructor(
                 postDao.insert(post.toPostEntity())
             }
             emit(response)
-        }else{
+        } else {
             val posts = arrayListOf<Post>()
-            postDao.getPosts().value?.forEach { post ->
+            postDao.getPosts().forEach { post ->
                 posts.add(post.toPost())
             }
             emit(posts)

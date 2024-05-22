@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/post_nav"
+    app:startDestination="@id/postsFragment">
+
+    <fragment
+        android:id="@+id/postsFragment"
+        android:name="com.paysky.posts.presentation.post_page.PostsFragment"
+        android:label="postsFragment"
+        tools:layout="@layout/fragment_posts">
+        <action
+            android:id="@+id/action_postsFragment_to_editingFragment"
+            app:destination="@id/editingFragment" />
+        <action
+            android:id="@+id/action_postsFragment_to_addingFragment"
+            app:destination="@id/addingFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/editingFragment"
+        android:name="com.paysky.posts.presentation.edit.EditingFragment"
+        android:label="EditingFragment"
+        tools:layout="@layout/adding_fragment"/>
+    <fragment
+        android:id="@+id/addingFragment"
+        android:name="com.paysky.posts.presentation.add.AddingFragment"
+        android:label="AddingFragment"
+        tools:layout="@layout/editing_fragment"/>
+</navigation>

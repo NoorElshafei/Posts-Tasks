@@ -13,14 +13,14 @@ interface PostService {
 
 
     @GET(EndPoints.POSTS)
-    fun getPosts(): List<Post>
+    suspend fun getPosts(): List<Post>
 
     @POST(EndPoints.POSTS)
-    fun createPost(@Body post: Post): Post
+    suspend fun createPost(@Body post: Post): Post
 
     @PUT(EndPoints.UPDATE)
-    fun updatePost(@Path("id") id: Int, @Body post: Post): Post
+    suspend fun updatePost(@Path("id") id: Int, @Body post: Post): Post
 
     @DELETE(EndPoints.DELETE)
-    fun deletePost(@Path("id") id: Int): Any
+    suspend fun deletePost(@Path("id") id: Int): Any
 }
